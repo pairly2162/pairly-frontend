@@ -159,15 +159,15 @@ export function UserView() {
                   { id: 'email', label: 'Email' },
                   { id: 'gender', label: 'Gender' },
                   { id: 'isOnline', label: 'Status' },
-                  { id: 'isMockData', label: 'Data Type' },
-                  { id: 'isSuperAdmin', label: 'Admin', align: 'center' },
+                  { id: 'role', label: 'Role' },
+                  { id: 'isVerified', label: 'Verified', align: 'center' },
                   { id: 'createdAt', label: 'Created' },
                 ]}
               />
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={7} align="center" sx={{ py: 3 }}>
+                    <TableCell colSpan={8} align="center" sx={{ py: 3 }}>
                       <CircularProgress />
                     </TableCell>
                   </TableRow>

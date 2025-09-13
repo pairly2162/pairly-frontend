@@ -108,10 +108,10 @@ export default function UsersPage() {
             <TableRow>
               <TableCell>User</TableCell>
               <TableCell>Email</TableCell>
+              <TableCell>Gender</TableCell>
               <TableCell>Status</TableCell>
               <TableCell>Role</TableCell>
               <TableCell>Created</TableCell>
-              <TableCell width={100} />
             </TableRow>
           </TableHead>
 
@@ -157,6 +157,12 @@ export default function UsersPage() {
                 </TableCell>
 
                 <TableCell>
+                  <Typography variant="body2">
+                    {user.gender ? user.gender.charAt(0).toUpperCase() + user.gender.slice(1) : 'Not specified'}
+                  </Typography>
+                </TableCell>
+
+                <TableCell>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <Box
                       sx={{
@@ -182,14 +188,6 @@ export default function UsersPage() {
                   <Typography variant="body2">
                     {new Date(user.createdAt).toLocaleDateString()}
                   </Typography>
-                </TableCell>
-
-                <TableCell align="right">
-                  <Tooltip title="View Details">
-                    <IconButton>
-                      <Iconify icon="solar:eye-bold" />
-                    </IconButton>
-                  </Tooltip>
                 </TableCell>
               </TableRow>
             ))}
