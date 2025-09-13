@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -8,9 +8,15 @@ import TableBody from '@mui/material/TableBody';
 import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
+import TableRow from '@mui/material/TableRow';
+import TableCell from '@mui/material/TableCell';
+import CircularProgress from '@mui/material/CircularProgress';
+import Alert from '@mui/material/Alert';
 
-import { _users } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
+import { authService } from 'src/services/auth.service';
+
+import type { AdminUser, UserPaginationParams } from 'src/services/auth.service';
 
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
@@ -20,24 +26,70 @@ import { UserTableRow } from '../user-table-row';
 import { UserTableHead } from '../user-table-head';
 import { TableEmptyRows } from '../table-empty-rows';
 import { UserTableToolbar } from '../user-table-toolbar';
-import { emptyRows, applyFilter, getComparator } from '../utils';
+import { emptyRows } from '../utils';
 
 import type { UserProps } from '../user-table-row';
 
 // ----------------------------------------------------------------------
 
+// Convert AdminUser to UserProps for compatibility
+function convertAdminUserToUserProps(adminUser: AdminUser): UserProps {
+  return {
+    id: adminUser.id,
+    name: adminUser.name,
+    email: adminUser.email,
+    role: adminUser.isSuperAdmin ? 'Super Admin' : 'User',
+    status: adminUser.isOnline ? 'online' : 'offline',
+    company: 'Pairly',
+    avatarUrl: adminUser.profilePhotoUrl || '',
+    isVerified: !adminUser.isDeleted,
+  };
+}
+
 export function UserView() {
   const table = useTable();
 
   const [filterName, setFilterName] = useState('');
+  const [isOnlineFilter, setIsOnlineFilter] = useState('');
+  const [isMockDataFilter, setIsMockDataFilter] = useState('');
+  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [total, setTotal] = useState(0);
 
-  const dataFiltered: UserProps[] = applyFilter({
-    inputData: _users,
-    comparator: getComparator(table.order, table.orderBy),
-    filterName,
-  });
+  const fetchUsers = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError('');
+      
+      const params: UserPaginationParams = {
+        page: table.page + 1, // API uses 1-based pagination
+        limit: table.rowsPerPage,
+        search: filterName || undefined,
+        isOnline: isOnlineFilter ? isOnlineFilter === 'true' : undefined,
+        isMockData: isMockDataFilter ? isMockDataFilter === 'true' : undefined,
+      };
 
-  const notFound = !dataFiltered.length && !!filterName;
+      const response = await authService.getUsers(params);
+      
+      if (response.success) {
+        setUsers(response.data.data);
+        setTotal(response.data.total);
+      } else {
+        setError(response.message);
+      }
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [table.page, table.rowsPerPage, filterName, isOnlineFilter, isMockDataFilter]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+
+  const notFound = !users.length && (!!filterName || !!isOnlineFilter || !!isMockDataFilter);
 
   return (
     <DashboardContent>
@@ -68,7 +120,23 @@ export function UserView() {
             setFilterName(event.target.value);
             table.onResetPage();
           }}
+          isOnlineFilter={isOnlineFilter}
+          onIsOnlineFilterChange={(value) => {
+            setIsOnlineFilter(value);
+            table.onResetPage();
+          }}
+          isMockDataFilter={isMockDataFilter}
+          onIsMockDataFilterChange={(value) => {
+            setIsMockDataFilter(value);
+            table.onResetPage();
+          }}
         />
+
+        {error && (
+          <Alert severity="error" sx={{ m: 2 }}>
+            {error}
+          </Alert>
+        )}
 
         <Scrollbar>
           <TableContainer sx={{ overflow: 'unset' }}>
@@ -76,42 +144,46 @@ export function UserView() {
               <UserTableHead
                 order={table.order}
                 orderBy={table.orderBy}
-                rowCount={_users.length}
+                rowCount={users.length}
                 numSelected={table.selected.length}
                 onSort={table.onSort}
                 onSelectAllRows={(checked) =>
                   table.onSelectAllRows(
                     checked,
-                    _users.map((user) => user.id)
+                    users.map((user) => user.id)
                   )
                 }
                 headLabel={[
                   { id: 'name', label: 'Name' },
-                  { id: 'company', label: 'Company' },
-                  { id: 'role', label: 'Role' },
-                  { id: 'isVerified', label: 'Verified', align: 'center' },
-                  { id: 'status', label: 'Status' },
+                  { id: 'email', label: 'Email' },
+                  { id: 'isOnline', label: 'Status' },
+                  { id: 'isMockData', label: 'Data Type' },
+                  { id: 'isSuperAdmin', label: 'Admin', align: 'center' },
+                  { id: 'createdAt', label: 'Created' },
                   { id: '' },
                 ]}
               />
               <TableBody>
-                {dataFiltered
-                  .slice(
-                    table.page * table.rowsPerPage,
-                    table.page * table.rowsPerPage + table.rowsPerPage
-                  )
-                  .map((row) => (
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={7} align="center" sx={{ py: 3 }}>
+                      <CircularProgress />
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  users.map((user) => (
                     <UserTableRow
-                      key={row.id}
-                      row={row}
-                      selected={table.selected.includes(row.id)}
-                      onSelectRow={() => table.onSelectRow(row.id)}
+                      key={user.id}
+                      row={convertAdminUserToUserProps(user)}
+                      selected={table.selected.includes(user.id)}
+                      onSelectRow={() => table.onSelectRow(user.id)}
                     />
-                  ))}
+                  ))
+                )}
 
                 <TableEmptyRows
                   height={68}
-                  emptyRows={emptyRows(table.page, table.rowsPerPage, _users.length)}
+                  emptyRows={emptyRows(table.page, table.rowsPerPage, users.length)}
                 />
 
                 {notFound && <TableNoData searchQuery={filterName} />}
@@ -123,7 +195,7 @@ export function UserView() {
         <TablePagination
           component="div"
           page={table.page}
-          count={_users.length}
+          count={total}
           rowsPerPage={table.rowsPerPage}
           onPageChange={table.onChangePage}
           rowsPerPageOptions={[5, 10, 25]}

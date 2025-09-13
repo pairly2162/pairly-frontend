@@ -23,24 +23,24 @@ export const navData = [
     path: '/dashboard/users',
     icon: icon('ic-user'),
   },
-  {
-    title: 'User Profile',
-    path: '/dashboard/user',
-    icon: icon('ic-user'),
-  },
-  {
-    title: 'Product',
-    path: '/dashboard/products',
-    icon: icon('ic-cart'),
-    info: (
-      <Label color="error" variant="inverted">
-        +3
-      </Label>
-    ),
-  },
-  {
-    title: 'Blog',
-    path: '/dashboard/blog',
-    icon: icon('ic-blog'),
-  },
+  // {
+  //   title: 'User Profile',
+  //   path: '/dashboard/user',
+  //   icon: icon('ic-user'),
+  // },
+  // {
+  //   title: 'Product',
+  //   path: '/dashboard/products',
+  //   icon: icon('ic-cart'),
+  //   info: (
+  //     <Label color="error" variant="inverted">
+  //       +3
+  //     </Label>
+  //   ),
+  // },
+  // {
+  //   title: 'Blog',
+  //   path: '/dashboard/blog',
+  //   icon: icon('ic-blog'),
+  // },
 ];

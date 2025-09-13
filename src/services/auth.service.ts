@@ -26,6 +26,7 @@ export interface AdminUser {
   isOnline: boolean;
   isDeleted: boolean;
   isSuperAdmin: boolean;
+  isMockData: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -50,6 +51,8 @@ export interface UserPaginationParams {
   search?: string;
   roleId?: string;
   isActive?: boolean;
+  isOnline?: boolean;
+  isMockData?: boolean;
 }
 
 class AuthService {
@@ -103,7 +106,7 @@ class AuthService {
         token: this.token
       });
       return response.data.success && response.data.valid;
-    } catch (error) {
+    } catch {
       this.clearToken();
       return false;
     }

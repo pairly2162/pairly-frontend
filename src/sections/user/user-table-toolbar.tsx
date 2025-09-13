@@ -4,6 +4,10 @@ import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import InputAdornment from '@mui/material/InputAdornment';
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import Box from '@mui/material/Box';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -13,9 +17,21 @@ type UserTableToolbarProps = {
   numSelected: number;
   filterName: string;
   onFilterName: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  isOnlineFilter: string;
+  onIsOnlineFilterChange: (value: string) => void;
+  isMockDataFilter: string;
+  onIsMockDataFilterChange: (value: string) => void;
 };
 
-export function UserTableToolbar({ numSelected, filterName, onFilterName }: UserTableToolbarProps) {
+export function UserTableToolbar({ 
+  numSelected, 
+  filterName, 
+  onFilterName, 
+  isOnlineFilter, 
+  onIsOnlineFilterChange, 
+  isMockDataFilter, 
+  onIsMockDataFilterChange 
+}: UserTableToolbarProps) {
   return (
     <Toolbar
       sx={{
@@ -34,18 +50,43 @@ export function UserTableToolbar({ numSelected, filterName, onFilterName }: User
           {numSelected} selected
         </Typography>
       ) : (
-        <OutlinedInput
-          fullWidth
-          value={filterName}
-          onChange={onFilterName}
-          placeholder="Search user..."
-          startAdornment={
-            <InputAdornment position="start">
-              <Iconify width={20} icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
-            </InputAdornment>
-          }
-          sx={{ maxWidth: 320 }}
-        />
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flex: 1 }}>
+          <OutlinedInput
+            value={filterName}
+            onChange={onFilterName}
+            placeholder="Search user..."
+            startAdornment={
+              <InputAdornment position="start">
+                <Iconify width={20} icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
+              </InputAdornment>
+            }
+            sx={{ maxWidth: 320 }}
+          />
+          
+          <FormControl size="small" sx={{ minWidth: 120 }}>
+            <Select
+              value={isOnlineFilter}
+              onChange={(e) => onIsOnlineFilterChange(e.target.value)}
+              displayEmpty
+            >
+              <MenuItem value="">All Status</MenuItem>
+              <MenuItem value="true">Online</MenuItem>
+              <MenuItem value="false">Offline</MenuItem>
+            </Select>
+          </FormControl>
+
+          <FormControl size="small" sx={{ minWidth: 120 }}>
+            <Select
+              value={isMockDataFilter}
+              onChange={(e) => onIsMockDataFilterChange(e.target.value)}
+              displayEmpty
+            >
+              <MenuItem value="">All Data</MenuItem>
+              <MenuItem value="true">Mock Data</MenuItem>
+              <MenuItem value="false">Real Data</MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
       )}
 
       {numSelected > 0 ? (

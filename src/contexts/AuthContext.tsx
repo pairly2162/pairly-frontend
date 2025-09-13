@@ -53,6 +53,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         isOnline: true,
         isDeleted: false,
         isSuperAdmin: true,
+        isMockData: true,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });

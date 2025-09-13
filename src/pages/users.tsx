@@ -23,6 +23,7 @@ import { useBoolean } from 'minimal-shared/hooks';
 
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
+import { UserTableToolbar } from '../sections/user/user-table-toolbar';
 
 import { authService, AdminUser, UserPaginationParams } from '../services/auth.service';
 
@@ -38,6 +39,9 @@ export default function UsersPage() {
   const [search, setSearch] = useState('');
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+  const [selected, setSelected] = useState<string[]>([]);
+  const [isOnlineFilter, setIsOnlineFilter] = useState('');
+  const [isMockDataFilter, setIsMockDataFilter] = useState('');
 
   const fetchUsers = useCallback(async () => {
     try {
@@ -48,6 +52,8 @@ export default function UsersPage() {
         page: page + 1, // API uses 1-based pagination
         limit: rowsPerPage,
         search: search || undefined,
+        isOnline: isOnlineFilter !== '' ? isOnlineFilter === 'true' : undefined,
+        isMockData: isMockDataFilter !== '' ? isMockDataFilter === 'true' : undefined,
       };
 
       const response = await authService.getUsers(params);
@@ -64,7 +70,7 @@ export default function UsersPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, rowsPerPage, search]);
+  }, [page, rowsPerPage, search, isOnlineFilter, isMockDataFilter]);
 
   useEffect(() => {
     fetchUsers();
@@ -82,6 +88,16 @@ export default function UsersPage() {
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(event.target.value);
     setPage(0); // Reset to first page when searching
+  };
+
+  const handleIsOnlineFilterChange = (value: string) => {
+    setIsOnlineFilter(value);
+    setPage(0); // Reset to first page when filtering
+  };
+
+  const handleIsMockDataFilterChange = (value: string) => {
+    setIsMockDataFilter(value);
+    setPage(0); // Reset to first page when filtering
   };
 
   const renderTable = (
@@ -190,22 +206,17 @@ export default function UsersPage() {
       </Typography>
 
       <Card>
-        <Box sx={{ p: 3 }}>
-          <TextField
-            fullWidth
-            placeholder="Search users..."
-            value={search}
-            onChange={handleSearchChange}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
-                </InputAdornment>
-              ),
-            }}
-            sx={{ mb: 3 }}
-          />
+        <UserTableToolbar
+          numSelected={selected.length}
+          filterName={search}
+          onFilterName={handleSearchChange}
+          isOnlineFilter={isOnlineFilter}
+          onIsOnlineFilterChange={handleIsOnlineFilterChange}
+          isMockDataFilter={isMockDataFilter}
+          onIsMockDataFilterChange={handleIsMockDataFilterChange}
+        />
 
+        <Box sx={{ p: 3 }}>
           {error && (
             <Alert severity="error" sx={{ mb: 3 }}>
               {error}

@@ -18,6 +18,7 @@ import { Iconify } from 'src/components/iconify';
 export type UserProps = {
   id: string;
   name: string;
+  email: string;
   role: string;
   status: string;
   company: string;
@@ -62,9 +63,19 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
           </Box>
         </TableCell>
 
-        <TableCell>{row.company}</TableCell>
+        <TableCell>{row.email}</TableCell>
 
-        <TableCell>{row.role}</TableCell>
+        <TableCell>
+          <Label color={row.status === 'online' ? 'success' : 'default'}>
+            {row.status}
+          </Label>
+        </TableCell>
+
+        <TableCell>
+          <Label color={row.role === 'Super Admin' ? 'warning' : 'info'}>
+            {row.role}
+          </Label>
+        </TableCell>
 
         <TableCell align="center">
           {row.isVerified ? (
@@ -75,7 +86,7 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
         </TableCell>
 
         <TableCell>
-          <Label color={(row.status === 'banned' && 'error') || 'success'}>{row.status}</Label>
+          {new Date().toLocaleDateString()}
         </TableCell>
 
         <TableCell align="right">
