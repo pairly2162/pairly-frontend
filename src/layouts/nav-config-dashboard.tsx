@@ -15,32 +15,32 @@ export type NavItem = {
 export const navData = [
   {
     title: 'Dashboard',
-    path: '/dashboard',
+    path: '/admin/dashboard',
     icon: icon('ic-analytics'),
   },
   {
     title: 'Users',
-    path: '/dashboard/users',
+    path: '/admin/dashboard/users',
     icon: icon('ic-user'),
   },
-  // {
-  //   title: 'User Profile',
-  //   path: '/dashboard/user',
-  //   icon: icon('ic-user'),
-  // },
-  // {
-  //   title: 'Product',
-  //   path: '/dashboard/products',
-  //   icon: icon('ic-cart'),
-  //   info: (
-  //     <Label color="error" variant="inverted">
-  //       +3
-  //     </Label>
-  //   ),
-  // },
-  // {
-  //   title: 'Blog',
-  //   path: '/dashboard/blog',
-  //   icon: icon('ic-blog'),
-  // },
+  {
+    title: 'User Profile',
+    path: '/admin/dashboard/user',
+    icon: icon('ic-user'),
+  },
+  {
+    title: 'Product',
+    path: '/admin/dashboard/products',
+    icon: icon('ic-cart'),
+    info: (
+      <Label color="error" variant="inverted">
+        +3
+      </Label>
+    ),
+  },
+  {
+    title: 'Blog',
+    path: '/admin/dashboard/blog',
+    icon: icon('ic-blog'),
+  },
 ];

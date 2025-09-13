@@ -10,16 +10,17 @@ import LinearProgress, { linearProgressClasses } from '@mui/material/LinearProgr
 import { AuthLayout } from 'src/layouts/auth';
 import { DashboardLayout } from 'src/layouts/dashboard';
 import { ProtectedRoute } from 'src/components/ProtectedRoute';
-import { AuthRedirect } from 'src/components/AuthRedirect';
 
 // ----------------------------------------------------------------------
 
+export const HomePage = lazy(() => import('src/pages/home'));
 export const DashboardPage = lazy(() => import('src/pages/dashboard'));
 export const BlogPage = lazy(() => import('src/pages/blog'));
 export const UserPage = lazy(() => import('src/pages/user'));
 export const UsersPage = lazy(() => import('src/pages/users'));
 export const SignInPage = lazy(() => import('src/pages/sign-in'));
 export const ProductsPage = lazy(() => import('src/pages/products'));
+export const PrivacyPolicyPage = lazy(() => import('src/pages/privacy-policy'));
 export const Page404 = lazy(() => import('src/pages/page-not-found'));
 
 const renderFallback = () => (
@@ -45,34 +46,43 @@ const renderFallback = () => (
 export const routesSection: RouteObject[] = [
   {
     path: '/',
-    element: <AuthRedirect />,
+    element: <HomePage />,
   },
   {
-    path: 'dashboard',
-    element: (
-      <ProtectedRoute>
-        <DashboardLayout>
-          <Suspense fallback={renderFallback()}>
-            <Outlet />
-          </Suspense>
-        </DashboardLayout>
-      </ProtectedRoute>
-    ),
+    path: 'privacy-policy',
+    element: <PrivacyPolicyPage />,
+  },
+  {
+    path: 'admin',
     children: [
-      { index: true, element: <DashboardPage /> },
-      { path: 'users', element: <UsersPage /> },
-      { path: 'user', element: <UserPage /> },
-      { path: 'products', element: <ProductsPage /> },
-      { path: 'blog', element: <BlogPage /> },
+      {
+        path: 'sign-in',
+        element: (
+          <AuthLayout>
+            <SignInPage />
+          </AuthLayout>
+        ),
+      },
+      {
+        path: 'dashboard',
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout>
+              <Suspense fallback={renderFallback()}>
+                <Outlet />
+              </Suspense>
+            </DashboardLayout>
+          </ProtectedRoute>
+        ),
+        children: [
+          { index: true, element: <DashboardPage /> },
+          { path: 'users', element: <UsersPage /> },
+          { path: 'user', element: <UserPage /> },
+          { path: 'products', element: <ProductsPage /> },
+          { path: 'blog', element: <BlogPage /> },
+        ],
+      },
     ],
-  },
-  {
-    path: 'sign-in',
-    element: (
-      <AuthLayout>
-        <SignInPage />
-      </AuthLayout>
-    ),
   },
   {
     path: '404',

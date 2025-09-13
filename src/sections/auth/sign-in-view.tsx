@@ -39,7 +39,7 @@ export function SignInView() {
       setIsLoading(true);
       setError('');
       await login({ email, password });
-      router.push('/');
+      router.push('/admin/dashboard');
     } catch (err: any) {
       setError(err.message || 'Login failed');
     } finally {
