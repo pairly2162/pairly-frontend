@@ -22,6 +22,7 @@ export interface AdminUser {
   id: string;
   name: string;
   email: string;
+  gender: string | null;
   profilePhotoUrl: string | null;
   isOnline: boolean;
   isDeleted: boolean;
@@ -53,6 +54,18 @@ export interface UserPaginationParams {
   isActive?: boolean;
   isOnline?: boolean;
   isMockData?: boolean;
+}
+
+export interface DashboardStats {
+  totalUsers: number;
+  onlineUsers: number;
+  offlineUsers: number;
+}
+
+export interface DashboardStatsResponse {
+  success: boolean;
+  message: string;
+  data: DashboardStats;
 }
 
 class AuthService {
@@ -152,6 +165,27 @@ class AuthService {
         throw new Error('Session expired. Please login again.');
       }
       throw new Error(err.response?.data?.message || 'Failed to fetch user stats');
+    }
+  }
+
+  async getDashboardStats(): Promise<DashboardStatsResponse> {
+    if (!this.token) {
+      throw new Error('Not authenticated');
+    }
+
+    try {
+      const response = await axios.get(`${API_BASE_URL}/admin/dashboard/stats`, {
+        headers: {
+          Authorization: `Bearer ${this.token}`
+        }
+      });
+      return response.data;
+    } catch (err: any) {
+      if (err.response?.status === 401) {
+        this.clearToken();
+        throw new Error('Session expired. Please login again.');
+      }
+      throw new Error(err.response?.data?.message || 'Failed to fetch dashboard stats');
     }
   }
 

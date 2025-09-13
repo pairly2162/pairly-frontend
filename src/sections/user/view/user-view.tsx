@@ -38,6 +38,7 @@ function convertAdminUserToUserProps(adminUser: AdminUser): UserProps {
     id: adminUser.id,
     name: adminUser.name,
     email: adminUser.email,
+    gender: adminUser.gender,
     role: adminUser.isSuperAdmin ? 'Super Admin' : 'User',
     status: adminUser.isOnline ? 'online' : 'offline',
     company: 'Pairly',
@@ -156,11 +157,11 @@ export function UserView() {
                 headLabel={[
                   { id: 'name', label: 'Name' },
                   { id: 'email', label: 'Email' },
+                  { id: 'gender', label: 'Gender' },
                   { id: 'isOnline', label: 'Status' },
                   { id: 'isMockData', label: 'Data Type' },
                   { id: 'isSuperAdmin', label: 'Admin', align: 'center' },
                   { id: 'createdAt', label: 'Created' },
-                  { id: '' },
                 ]}
               />
               <TableBody>

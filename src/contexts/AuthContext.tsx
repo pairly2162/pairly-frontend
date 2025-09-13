@@ -49,6 +49,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         id: 'admin',
         name: 'Admin User',
         email: 'admin@pairly.com',
+        gender: null,
         profilePhotoUrl: null,
         isOnline: true,
         isDeleted: false,

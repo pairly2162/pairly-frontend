@@ -99,11 +99,7 @@ const ItemRoot = styled('div')(({ theme }) => ({
 
 const ItemIcon = styled('span')({
   display: 'inline-flex',
-  color: 'var(--icon-color)',
-  /**
-   * As ':first-child' for ssr
-   * https://github.com/emotion-js/emotion/issues/1105#issuecomment-1126025608
-   */
+  color: 'var(--icon-color)',  
   '& > :first-of-type:not(style):not(:first-of-type ~ *), & > style + *': { width: 20, height: 20 },
 });
 
