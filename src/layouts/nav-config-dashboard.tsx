@@ -22,25 +22,5 @@ export const navData = [
     title: 'Users',
     path: '/admin/dashboard/users',
     icon: icon('ic-user'),
-  },
-  {
-    title: 'User Profile',
-    path: '/admin/dashboard/user',
-    icon: icon('ic-user'),
-  },
-  {
-    title: 'Product',
-    path: '/admin/dashboard/products',
-    icon: icon('ic-cart'),
-    info: (
-      <Label color="error" variant="inverted">
-        +3
-      </Label>
-    ),
-  },
-  {
-    title: 'Blog',
-    path: '/admin/dashboard/blog',
-    icon: icon('ic-blog'),
-  },
+  }  
 ];
