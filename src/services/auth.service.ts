@@ -273,6 +273,7 @@ class AuthService {
     }
   }
 
+
   logout() {
     this.clearToken();
   }

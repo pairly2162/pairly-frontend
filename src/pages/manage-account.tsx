@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { 
-  Box, 
   Alert, 
+  Box, 
   Card, 
-  Container, 
   CardContent, 
-  Snackbar, 
+  Container, 
   FormControlLabel, 
+  Snackbar, 
   Switch, 
   Tab, 
   Tabs, 
@@ -52,7 +52,7 @@ export default function ManageAccountPage() {
     confirmPassword: '',
   });
   const [settings, setSettings] = useState({
-    isMockDataEnabled: admin?.isMockData || false,
+    isMockDataEnabled: false,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -61,12 +61,18 @@ export default function ManageAccountPage() {
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
 
-  // Update profile data and settings when admin data changes
+  // Update profile data when admin data changes
   useEffect(() => {
     if (admin) {
       setProfileData({
         name: admin.name || '',
       });
+    }
+  }, [admin]);
+
+  // Update settings when admin data changes
+  useEffect(() => {
+    if (admin) {
       setSettings({
         isMockDataEnabled: admin.isMockData || false,
       });
@@ -185,8 +191,6 @@ export default function ManageAccountPage() {
       if (response.success) {
         setSuccess('Settings updated successfully!');
         showSnackbar('Settings updated successfully!', 'success');
-        // Update the admin context with new data
-        // Note: In a real app, you might want to update the context or refetch admin data
       } else {
         setError(response.message || 'Failed to update settings');
         showSnackbar(response.message || 'Failed to update settings', 'error');
@@ -322,7 +326,7 @@ export default function ManageAccountPage() {
                     />
                     
                     <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                      When enabled, the application will use mock data for testing and development purposes.
+                      When enabled, mock data will be included in discovery results for all users. This is a global setting that affects the entire application.
                     </Typography>
                   </CardContent>
                 </Card>
