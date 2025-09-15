@@ -27,7 +27,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/sign-in" state={{ from: location }} replace />;
+    return <Navigate to="/admin/sign-in" state={{ from: location }} replace />;
   }
 
   return <>{children}</>;

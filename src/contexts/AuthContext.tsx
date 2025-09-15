@@ -42,22 +42,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return;
       }
 
-      // For now, if we have a token, assume it's valid
-      // In production, you might want to validate it with the backend
-      setIsAuthenticated(true);
-      setAdmin({
-        id: 'admin',
-        name: 'Admin User',
-        email: 'admin@pairly.com',
-        gender: null,
-        profilePhotoUrl: null,
-        isOnline: true,
-        isDeleted: false,
-        isSuperAdmin: true,
-        isMockData: true,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      });
+      // Get current admin data from the API
+      const response = await authService.getCurrentAdmin();
+      if (response.success) {
+        setIsAuthenticated(true);
+        setAdmin({
+          id: response.admin.id,
+          name: response.admin.name,
+          email: response.admin.email,
+          gender: null,
+          profilePhotoUrl: null,
+          isOnline: true,
+          isDeleted: false,
+          isSuperAdmin: response.admin.isSuperAdmin,
+          isMockData: response.admin.isMockData,
+          createdAt: response.admin.createdAt,
+          updatedAt: response.admin.updatedAt,
+        });
+      } else {
+        setIsAuthenticated(false);
+        setAdmin(null);
+      }
     } catch (error) {
       console.warn('Auth check failed:', error);
       setIsAuthenticated(false);

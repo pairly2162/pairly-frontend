@@ -189,6 +189,90 @@ class AuthService {
     }
   }
 
+  async updateProfile(adminId: string, profileData: { name: string }) {
+    if (!this.token) {
+      throw new Error('Not authenticated');
+    }
+
+    try {
+      const response = await axios.put(`${API_BASE_URL}/admin/users/${adminId}/profile`, profileData, {
+        headers: {
+          Authorization: `Bearer ${this.token}`
+        }
+      });
+      return response.data;
+    } catch (err: any) {
+      if (err.response?.status === 401) {
+        this.clearToken();
+        throw new Error('Session expired. Please login again.');
+      }
+      throw new Error(err.response?.data?.message || 'Failed to update profile');
+    }
+  }
+
+  async changePassword(adminId: string, passwordData: { currentPassword: string; newPassword: string; confirmPassword: string }) {
+    if (!this.token) {
+      throw new Error('Not authenticated');
+    }
+
+    try {
+      const response = await axios.put(`${API_BASE_URL}/admin/users/${adminId}/password`, passwordData, {
+        headers: {
+          Authorization: `Bearer ${this.token}`
+        }
+      });
+      return response.data;
+    } catch (err: any) {
+      if (err.response?.status === 401) {
+        this.clearToken();
+        throw new Error('Session expired. Please login again.');
+      }
+      throw new Error(err.response?.data?.message || 'Failed to change password');
+    }
+  }
+
+  async updateSettings(adminId: string, settingsData: { isMockDataEnabled: boolean }) {
+    if (!this.token) {
+      throw new Error('Not authenticated');
+    }
+
+    try {
+      const response = await axios.put(`${API_BASE_URL}/admin/users/${adminId}/settings`, settingsData, {
+        headers: {
+          Authorization: `Bearer ${this.token}`
+        }
+      });
+      return response.data;
+    } catch (err: any) {
+      if (err.response?.status === 401) {
+        this.clearToken();
+        throw new Error('Session expired. Please login again.');
+      }
+      throw new Error(err.response?.data?.message || 'Failed to update settings');
+    }
+  }
+
+  async getCurrentAdmin() {
+    if (!this.token) {
+      throw new Error('Not authenticated');
+    }
+
+    try {
+      const response = await axios.get(`${API_BASE_URL}/admin/me`, {
+        headers: {
+          Authorization: `Bearer ${this.token}`
+        }
+      });
+      return response.data;
+    } catch (err: any) {
+      if (err.response?.status === 401) {
+        this.clearToken();
+        throw new Error('Session expired. Please login again.');
+      }
+      throw new Error(err.response?.data?.message || 'Failed to get current admin');
+    }
+  }
+
   logout() {
     this.clearToken();
   }
