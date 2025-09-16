@@ -70,14 +70,26 @@ export default function ManageAccountPage() {
     }
   }, [admin]);
 
-  // Update settings when admin data changes
+  // Load global settings on component mount
   useEffect(() => {
-    if (admin) {
-      setSettings({
-        isMockDataEnabled: admin.isMockData || false,
-      });
-    }
-  }, [admin]);
+    const loadGlobalSettings = async () => {
+      try {
+        const response = await authService.getGlobalSettings();
+        if (response.success && response.data) {
+          const mockDataSetting = response.data.find((setting: any) => setting.key === 'isMockDataEnabled');
+          if (mockDataSetting) {
+            setSettings({
+              isMockDataEnabled: mockDataSetting.value === 'true',
+            });
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load global settings:', err);
+      }
+    };
+
+    loadGlobalSettings();
+  }, []);
 
   const showSnackbar = (message: string, severity: 'success' | 'error') => {
     setSnackbarMessage(message);

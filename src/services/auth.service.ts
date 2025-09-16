@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://api.pairly.fun';
 
 export interface AdminLoginRequest {
   email: string;
@@ -270,6 +270,27 @@ class AuthService {
         throw new Error('Session expired. Please login again.');
       }
       throw new Error(err.response?.data?.message || 'Failed to get current admin');
+    }
+  }
+
+  async getGlobalSettings() {
+    if (!this.token) {
+      throw new Error('Not authenticated');
+    }
+
+    try {
+      const response = await axios.get(`${API_BASE_URL}/admin/users/global-settings`, {
+        headers: {
+          Authorization: `Bearer ${this.token}`
+        }
+      });
+      return response.data;
+    } catch (err: any) {
+      if (err.response?.status === 401) {
+        this.clearToken();
+        throw new Error('Session expired. Please login again.');
+      }
+      throw new Error(err.response?.data?.message || 'Failed to get global settings');
     }
   }
 
