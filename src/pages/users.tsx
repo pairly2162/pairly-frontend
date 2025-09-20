@@ -111,6 +111,7 @@ export default function UsersPage() {
               <TableCell>Gender</TableCell>
               <TableCell>Status</TableCell>
               <TableCell>Role</TableCell>
+              <TableCell>Mock Data</TableCell>
               <TableCell>Created</TableCell>
             </TableRow>
           </TableHead>
@@ -181,6 +182,12 @@ export default function UsersPage() {
                 <TableCell>
                   <Typography variant="body2">
                     {user.isSuperAdmin ? 'Super Admin' : 'User'}
+                  </Typography>
+                </TableCell>
+
+                <TableCell>
+                  <Typography variant="body2">
+                    {user.isMockData ? 'Yes' : 'No'}
                   </Typography>
                 </TableCell>
 

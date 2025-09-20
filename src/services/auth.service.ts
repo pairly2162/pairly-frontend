@@ -2,6 +2,8 @@ import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://api.pairly.fun';
 
+// const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
 export interface AdminLoginRequest {
   email: string;
   password: string;
@@ -237,7 +239,9 @@ class AuthService {
     }
 
     try {
-      const response = await axios.put(`${API_BASE_URL}/admin/users/${adminId}/settings`, settingsData, {
+      const response = await axios.put(`${API_BASE_URL}/admin/users/global-settings/mock-data`, {
+        enabled: settingsData.isMockDataEnabled
+      }, {
         headers: {
           Authorization: `Bearer ${this.token}`
         }
@@ -279,7 +283,7 @@ class AuthService {
     }
 
     try {
-      const response = await axios.get(`${API_BASE_URL}/admin/users/global-settings`, {
+      const response = await axios.get(`${API_BASE_URL}/admin/users/global-settings/data`, {
         headers: {
           Authorization: `Bearer ${this.token}`
         }
