@@ -56,6 +56,7 @@ export interface UserPaginationParams {
   isActive?: boolean;
   isOnline?: boolean;
   isMockData?: boolean;
+  gender?: string;
 }
 
 export interface DashboardStats {
@@ -295,6 +296,108 @@ class AuthService {
         throw new Error('Session expired. Please login again.');
       }
       throw new Error(err.response?.data?.message || 'Failed to get global settings');
+    }
+  }
+
+  async deleteUser(userId: string) {
+    if (!this.token) {
+      throw new Error('Not authenticated');
+    }
+
+    try {
+      const response = await axios.delete(`${API_BASE_URL}/admin/users/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${this.token}`
+        }
+      });
+      return response.data;
+    } catch (err: any) {
+      if (err.response?.status === 401) {
+        this.clearToken();
+        throw new Error('Session expired. Please login again.');
+      }
+      throw new Error(err.response?.data?.message || 'Failed to delete user');
+    }
+  }
+
+  async createUser(userData: {
+    name: string;
+    email?: string;
+    sexuality: string;
+    dateOfBirth: string;
+    gender: string;
+    interestedIn: string[];
+    profilePhotoUrl?: string;
+    photoUrls?: string[];
+    interests?: string[];
+    placeId?: string;
+  }) {
+    if (!this.token) {
+      throw new Error('Not authenticated');
+    }
+
+    try {
+      const response = await axios.post(`${API_BASE_URL}/admin/users`, userData, {
+        headers: {
+          Authorization: `Bearer ${this.token}`
+        }
+      });
+      return response.data;
+    } catch (err: any) {
+      if (err.response?.status === 401) {
+        this.clearToken();
+        throw new Error('Session expired. Please login again.');
+      }
+      throw new Error(err.response?.data?.message || 'Failed to create user');
+    }
+  }
+
+  async uploadFiles(files: File[]) {
+    if (!this.token) {
+      throw new Error('Not authenticated');
+    }
+
+    const formData = new FormData();
+    files.forEach(file => {
+      formData.append('files', file);
+    });
+
+    try {
+      const response = await axios.post(`${API_BASE_URL}/files/upload`, formData, {
+        headers: {
+          Authorization: `Bearer ${this.token}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      return response.data;
+    } catch (err: any) {
+      if (err.response?.status === 401) {
+        this.clearToken();
+        throw new Error('Session expired. Please login again.');
+      }
+      throw new Error(err.response?.data?.message || 'Failed to upload files');
+    }
+  }
+
+  async getPlacesAutocomplete(query: string) {
+    if (!this.token) {
+      throw new Error('Not authenticated');
+    }
+
+    try {
+      const response = await axios.get(`${API_BASE_URL}/places/autocomplete`, {
+        headers: {
+          Authorization: `Bearer ${this.token}`
+        },
+        params: { query }
+      });
+      return response.data;
+    } catch (err: any) {
+      if (err.response?.status === 401) {
+        this.clearToken();
+        throw new Error('Session expired. Please login again.');
+      }
+      throw new Error(err.response?.data?.message || 'Failed to get places autocomplete');
     }
   }
 

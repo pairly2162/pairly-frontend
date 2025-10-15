@@ -21,6 +21,8 @@ type UserTableToolbarProps = {
   onIsOnlineFilterChange: (value: string) => void;
   isMockDataFilter: string;
   onIsMockDataFilterChange: (value: string) => void;
+  genderFilter: string;
+  onGenderFilterChange: (value: string) => void;
 };
 
 export function UserTableToolbar({ 
@@ -30,7 +32,9 @@ export function UserTableToolbar({
   isOnlineFilter, 
   onIsOnlineFilterChange, 
   isMockDataFilter, 
-  onIsMockDataFilterChange 
+  onIsMockDataFilterChange,
+  genderFilter,
+  onGenderFilterChange
 }: UserTableToolbarProps) {
   return (
     <Toolbar
@@ -84,6 +88,19 @@ export function UserTableToolbar({
               <MenuItem value="">All Data</MenuItem>
               <MenuItem value="true">Mock Data</MenuItem>
               <MenuItem value="false">Real Data</MenuItem>
+            </Select>
+          </FormControl>
+
+          <FormControl size="small" sx={{ minWidth: 120 }}>
+            <Select
+              value={genderFilter}
+              onChange={(e) => onGenderFilterChange(e.target.value)}
+              displayEmpty
+            >
+              <MenuItem value="">All Gender</MenuItem>
+              <MenuItem value="male">Male</MenuItem>
+              <MenuItem value="female">Female</MenuItem>
+              <MenuItem value="other">Other</MenuItem>
             </Select>
           </FormControl>
         </Box>
