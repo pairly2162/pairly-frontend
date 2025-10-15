@@ -26,6 +26,7 @@ export interface AdminUser {
   email: string;
   gender: string | null;
   profilePhotoUrl: string | null;
+  formattedAddress: string | null;
   isOnline: boolean;
   isDeleted: boolean;
   isSuperAdmin: boolean;

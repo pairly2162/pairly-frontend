@@ -354,6 +354,7 @@ export default function UsersPage() {
             <TableRow>
               <TableCell>User</TableCell>
               <TableCell>Email</TableCell>
+              <TableCell>Address</TableCell>
               <TableCell>Gender</TableCell>
               <TableCell>Status</TableCell>
               <TableCell>Role</TableCell>
@@ -401,6 +402,12 @@ export default function UsersPage() {
                 <TableCell>
                   <Typography variant="body2" noWrap>
                     {user.email}
+                  </Typography>
+                </TableCell>
+
+                <TableCell>
+                  <Typography variant="body2" noWrap>
+                    {user.formattedAddress || 'Not specified'}
                   </Typography>
                 </TableCell>
 

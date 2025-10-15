@@ -52,6 +52,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           email: response.admin.email,
           gender: null,
           profilePhotoUrl: null,
+          formattedAddress: null,
           isOnline: true,
           isDeleted: false,
           isSuperAdmin: response.admin.isSuperAdmin,
