@@ -77,6 +77,7 @@ export default function UsersPage() {
     gender: 'male',
     interestedIn: [] as string[],
     interests: [] as string[],
+    height: '',
   });
   const [profilePhotoFile, setProfilePhotoFile] = useState<File | null>(null);
   const [photoFiles, setPhotoFiles] = useState<File[]>([]);
@@ -202,6 +203,7 @@ export default function UsersPage() {
       gender: 'male',
       interestedIn: [],
       interests: [],
+      height: '',
     });
     setProfilePhotoFile(null);
     setPhotoFiles([]);
@@ -217,6 +219,7 @@ export default function UsersPage() {
       gender: 'male',
       interestedIn: [],
       interests: [],
+      height: '',
     });
     setProfilePhotoFile(null);
     setPhotoFiles([]);
@@ -249,7 +252,7 @@ export default function UsersPage() {
       setAddError('');
 
       // Validate required fields
-      if (!formData.name || !formData.dateOfBirth || !formData.gender || !formData.sexuality) {
+      if (!formData.name || !formData.dateOfBirth || !formData.gender || !formData.sexuality || !formData.height) {
         setAddError('Please fill in all required fields');
         setAddLoading(false);
         setUploadProgress(false);
@@ -258,6 +261,14 @@ export default function UsersPage() {
 
       if (formData.interestedIn.length === 0) {
         setAddError('Please select at least one interested gender');
+        setAddLoading(false);
+        setUploadProgress(false);
+        return;
+      }
+
+      // Validate height (required field)
+      if (!formData.height || isNaN(Number(formData.height)) || Number(formData.height) <= 0) {
+        setAddError('Height must be a valid positive number');
         setAddLoading(false);
         setUploadProgress(false);
         return;
@@ -287,6 +298,7 @@ export default function UsersPage() {
       // Create user with uploaded file URLs
       const userData = {
         ...formData,
+        height: formData.height ? Number(formData.height) : undefined,
         profilePhotoUrl: profilePhotoUrl || undefined,
         photoUrls: photoUrls.length > 0 ? photoUrls : undefined,
         placeId: selectedPlace?.placeId || undefined,
@@ -671,6 +683,20 @@ export default function UsersPage() {
               <MenuItem value="lesbian">Lesbian</MenuItem>
               <MenuItem value="bisexual">Bisexual</MenuItem>
             </TextField>
+
+            <TextField
+              label="Height (cm)"
+              fullWidth
+              required
+              type="number"
+              value={formData.height}
+              onChange={(e) => handleFormChange('height', e.target.value)}
+              inputProps={{
+                min: 0,
+                step: 0.1,
+              }}
+              helperText="Enter height in centimeters"
+            />
 
             <FormControl fullWidth required>
               <InputLabel>Interested In</InputLabel>
