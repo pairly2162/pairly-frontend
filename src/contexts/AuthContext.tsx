@@ -53,6 +53,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           gender: null,
           profilePhotoUrl: null,
           formattedAddress: null,
+          city: null,
           isOnline: true,
           isDeleted: false,
           isSuperAdmin: response.admin.isSuperAdmin,

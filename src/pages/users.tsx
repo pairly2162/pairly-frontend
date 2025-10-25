@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -30,6 +31,9 @@ import Chip from '@mui/material/Chip';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import Stack from '@mui/material/Stack';
 import Autocomplete from '@mui/material/Autocomplete';
+import Menu from '@mui/material/Menu';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
 
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
@@ -41,7 +45,7 @@ import type { AdminUser, UserPaginationParams } from '../services/auth.service';
 // ----------------------------------------------------------------------
 
 export default function UsersPage() {
-
+  const navigate = useNavigate();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -52,9 +56,14 @@ export default function UsersPage() {
   const [isOnlineFilter, setIsOnlineFilter] = useState('');
   const [isMockDataFilter, setIsMockDataFilter] = useState('');
   const [genderFilter, setGenderFilter] = useState('');
+  const [cityFilter, setCityFilter] = useState('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<AdminUser | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  
+  // Action Menu States
+  const [actionMenuAnchor, setActionMenuAnchor] = useState<null | HTMLElement>(null);
+  const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
   
   // Add User Dialog States
   const [addDialogOpen, setAddDialogOpen] = useState(false);
@@ -92,6 +101,7 @@ export default function UsersPage() {
         isOnline: isOnlineFilter !== '' ? isOnlineFilter === 'true' : undefined,
         isMockData: isMockDataFilter !== '' ? isMockDataFilter === 'true' : undefined,
         gender: genderFilter || undefined,
+        city: cityFilter || undefined,
       };
 
       const response = await authService.getUsers(params);
@@ -107,7 +117,7 @@ export default function UsersPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, rowsPerPage, search, isOnlineFilter, isMockDataFilter, genderFilter]);
+  }, [page, rowsPerPage, search, isOnlineFilter, isMockDataFilter, genderFilter, cityFilter]);
 
   useEffect(() => {
     fetchUsers();
@@ -139,6 +149,11 @@ export default function UsersPage() {
 
   const handleGenderFilterChange = (value: string) => {
     setGenderFilter(value);
+    setPage(0); // Reset to first page when filtering
+  };
+
+  const handleCityFilterChange = (value: string) => {
+    setCityFilter(value);
     setPage(0); // Reset to first page when filtering
   };
 
@@ -346,6 +361,30 @@ export default function UsersPage() {
     setSelectedPlace(newValue);
   };
 
+  const handleActionMenuOpen = (event: React.MouseEvent<HTMLElement>, user: AdminUser) => {
+    setActionMenuAnchor(event.currentTarget);
+    setSelectedUser(user);
+  };
+
+  const handleActionMenuClose = () => {
+    setActionMenuAnchor(null);
+    setSelectedUser(null);
+  };
+
+  const handleViewDetails = () => {
+    if (selectedUser) {
+      navigate(`/admin/user/${selectedUser.id}`);
+    }
+    handleActionMenuClose();
+  };
+
+  const handleDeleteUser = () => {
+    if (selectedUser) {
+      handleDeleteClick(selectedUser);
+    }
+    handleActionMenuClose();
+  };
+
   const renderTable = (
     <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
       <Scrollbar>
@@ -355,6 +394,7 @@ export default function UsersPage() {
               <TableCell>User</TableCell>
               <TableCell>Email</TableCell>
               <TableCell>Address</TableCell>
+              <TableCell>City</TableCell>
               <TableCell>Gender</TableCell>
               <TableCell>Status</TableCell>
               <TableCell>Role</TableCell>
@@ -412,6 +452,12 @@ export default function UsersPage() {
                 </TableCell>
 
                 <TableCell>
+                  <Typography variant="body2" noWrap>
+                    {user.city || 'Not specified'}
+                  </Typography>
+                </TableCell>
+
+                <TableCell>
                   <Typography variant="body2">
                     {user.gender ? user.gender.charAt(0).toUpperCase() + user.gender.slice(1) : 'Not specified'}
                   </Typography>
@@ -452,12 +498,11 @@ export default function UsersPage() {
                 </TableCell>
 
                 <TableCell align="right">
-                  <Tooltip title="Delete user">
+                  <Tooltip title="Actions">
                     <IconButton 
-                      color="error" 
-                      onClick={() => handleDeleteClick(user)}
+                      onClick={(e) => handleActionMenuOpen(e, user)}
                     >
-                      <Iconify icon="solar:trash-bin-trash-bold" />
+                      <Iconify icon="custom:menu-duotone" />
                     </IconButton>
                   </Tooltip>
                 </TableCell>
@@ -495,6 +540,8 @@ export default function UsersPage() {
           onIsMockDataFilterChange={handleIsMockDataFilterChange}
           genderFilter={genderFilter}
           onGenderFilterChange={handleGenderFilterChange}
+          cityFilter={cityFilter}
+          onCityFilterChange={handleCityFilterChange}
         />
 
         <Box sx={{ p: 3 }}>
@@ -772,6 +819,34 @@ export default function UsersPage() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Action Menu */}
+      <Menu
+        anchorEl={actionMenuAnchor}
+        open={Boolean(actionMenuAnchor)}
+        onClose={handleActionMenuClose}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+      >
+        <MenuItem onClick={handleViewDetails}>
+          <ListItemIcon>
+            <Iconify icon="solar:eye-bold" />
+          </ListItemIcon>
+          <ListItemText>View Details</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={handleDeleteUser} sx={{ color: 'error.main' }}>
+          <ListItemIcon>
+            <Iconify icon="solar:trash-bin-trash-bold" sx={{ color: 'error.main' }} />
+          </ListItemIcon>
+          <ListItemText>Delete User</ListItemText>
+        </MenuItem>
+      </Menu>
 
     </Container>
   );

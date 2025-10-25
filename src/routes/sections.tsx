@@ -18,6 +18,7 @@ export const DashboardPage = lazy(() => import('src/pages/dashboard'));
 export const BlogPage = lazy(() => import('src/pages/blog'));
 export const UserPage = lazy(() => import('src/pages/user'));
 export const UsersPage = lazy(() => import('src/pages/users'));
+export const UserDetailsPage = lazy(() => import('src/pages/user-details'));
 export const SignInPage = lazy(() => import('src/pages/sign-in'));
 export const ProductsPage = lazy(() => import('src/pages/products'));
 export const PrivacyPolicyPage = lazy(() => import('src/pages/privacy-policy'));
@@ -82,6 +83,16 @@ export const routesSection: RouteObject[] = [
           { path: 'products', element: <ProductsPage /> },
           { path: 'blog', element: <BlogPage /> },
         ],
+      },
+      {
+        path: 'user/:id',
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout>
+              <UserDetailsPage />
+            </DashboardLayout>
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'manage-account',

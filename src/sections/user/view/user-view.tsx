@@ -54,6 +54,7 @@ export function UserView() {
   const [isOnlineFilter, setIsOnlineFilter] = useState('');
   const [isMockDataFilter, setIsMockDataFilter] = useState('');
   const [genderFilter, setGenderFilter] = useState('');
+  const [cityFilter, setCityFilter] = useState('');
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -71,6 +72,7 @@ export function UserView() {
         isOnline: isOnlineFilter ? isOnlineFilter === 'true' : undefined,
         isMockData: isMockDataFilter ? isMockDataFilter === 'true' : undefined,
         gender: genderFilter || undefined,
+        city: cityFilter || undefined,
       };
 
       const response = await authService.getUsers(params);
@@ -86,13 +88,13 @@ export function UserView() {
     } finally {
       setLoading(false);
     }
-  }, [table.page, table.rowsPerPage, filterName, isOnlineFilter, isMockDataFilter, genderFilter]);
+  }, [table.page, table.rowsPerPage, filterName, isOnlineFilter, isMockDataFilter, genderFilter, cityFilter]);
 
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
 
-  const notFound = !users.length && (!!filterName || !!isOnlineFilter || !!isMockDataFilter || !!genderFilter);
+  const notFound = !users.length && (!!filterName || !!isOnlineFilter || !!isMockDataFilter || !!genderFilter || !!cityFilter);
 
   return (
     <DashboardContent>
@@ -136,6 +138,11 @@ export function UserView() {
           genderFilter={genderFilter}
           onGenderFilterChange={(value) => {
             setGenderFilter(value);
+            table.onResetPage();
+          }}
+          cityFilter={cityFilter}
+          onCityFilterChange={(value) => {
+            setCityFilter(value);
             table.onResetPage();
           }}
         />
