@@ -142,6 +142,14 @@ export default function UserDetailsPage() {
     return `${height} cm`;
   };
 
+  const getPhotoUrl = (photoUrl: string) => {
+    if (photoUrl.startsWith('/public/')) {
+      const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://api.pairly.fun';
+      return `${apiBaseUrl}${photoUrl}`;
+    }
+    return photoUrl;
+  };
+
   const handleDeletePhoto = async (photoUrl: string) => {
     if (!id || !userDetails) return;
     
@@ -261,7 +269,7 @@ export default function UserDetailsPage() {
           <Box sx={{ flex: { xs: '1', md: '0 0 33.333%' } }}>
           <Card sx={{ p: 3, textAlign: 'center' }}>
             <Avatar
-              src={userDetails.profilePhotoUrl || undefined}
+              src={userDetails.profilePhotoUrl ? getPhotoUrl(userDetails.profilePhotoUrl) : undefined}
               sx={{ width: 120, height: 120, mx: 'auto', mb: 2 }}
             >
               {userDetails.name?.charAt(0).toUpperCase()}
@@ -529,7 +537,7 @@ export default function UserDetailsPage() {
                             </IconButton>
                           </Box>
                           <img
-                            src={photoUrl}
+                            src={getPhotoUrl(photoUrl)}
                             alt={`Photo ${index + 1}`}
                             style={{
                               width: '100%',

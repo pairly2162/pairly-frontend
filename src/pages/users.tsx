@@ -397,6 +397,14 @@ export default function UsersPage() {
     handleActionMenuClose();
   };
 
+  const getPhotoUrl = (photoUrl: string) => {
+    if (photoUrl.startsWith('/public/')) {
+      const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://api.pairly.fun';
+      return `${apiBaseUrl}${photoUrl}`;
+    }
+    return photoUrl;
+  };
+
   const renderTable = (
     <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
       <Scrollbar>
@@ -435,7 +443,7 @@ export default function UsersPage() {
                     >
                       {user.profilePhotoUrl ? (
                         <img
-                          src={user.profilePhotoUrl}
+                          src={getPhotoUrl(user.profilePhotoUrl)}
                           alt={user.name}
                           style={{ width: '100%', height: '100%', borderRadius: '50%' }}
                         />
