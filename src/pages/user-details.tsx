@@ -184,17 +184,14 @@ export default function UserDetailsPage() {
       setUploadLoading(true);
       const response = await authService.addUserPhotos(id, files);
       
-      if (response.success && userDetails) {
-        // Update local state with new photos
-        setUserDetails({
-          ...userDetails,
-          photoUrls: [...(userDetails.photoUrls || []), ...response.data.photoUrls]
-        });
+      if (response.success) {
         setSnackbar({ open: true, message: 'Photos added successfully', severity: 'success' });
         // Reset file input
         if (fileInputRef.current) {
           fileInputRef.current.value = '';
         }
+        // Refresh user data to get the latest from server
+        await fetchUserDetails();
       } else {
         setSnackbar({ open: true, message: response.message || 'Failed to add photos', severity: 'error' });
       }
