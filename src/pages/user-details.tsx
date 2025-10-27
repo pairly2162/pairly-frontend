@@ -455,7 +455,7 @@ export default function UserDetailsPage() {
                   <Button
                     variant="contained"
                     size="small"
-                    startIcon={<Iconify icon="solar:gallery-add-bold" />}
+                    startIcon={<Iconify icon="mingcute:add-line" />}
                     component="label"
                     disabled={uploadLoading}
                   >
@@ -524,7 +524,7 @@ export default function UserDetailsPage() {
                               {deleteLoading === photoUrl ? (
                                 <CircularProgress size={20} />
                               ) : (
-                                <Iconify icon="solar:trash-bin-minimalistic-bold" width={20} />
+                                <Iconify icon="solar:trash-bin-trash-bold" width={20} />
                               )}
                             </IconButton>
                           </Box>
