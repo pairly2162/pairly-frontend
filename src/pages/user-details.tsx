@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
 import Box from '@mui/material/Box';
@@ -14,6 +14,9 @@ import Avatar from '@mui/material/Avatar';
 import Divider from '@mui/material/Divider';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
+import IconButton from '@mui/material/IconButton';
+import Snackbar from '@mui/material/Snackbar';
+import LinearProgress from '@mui/material/LinearProgress';
 
 import { Iconify } from 'src/components/iconify';
 import { authService } from '../services/auth.service';
@@ -75,6 +78,10 @@ export default function UserDetailsPage() {
   const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
+  const [uploadLoading, setUploadLoading] = useState(false);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fetchUserDetails = useCallback(async () => {
     if (!id) {
@@ -133,6 +140,65 @@ export default function UserDetailsPage() {
       return `${feet}'${inches}"`;
     }
     return `${height} cm`;
+  };
+
+  const handleDeletePhoto = async (photoUrl: string) => {
+    if (!id || !userDetails) return;
+    
+    try {
+      setDeleteLoading(photoUrl);
+      const response = await authService.deleteUserPhoto(id, photoUrl);
+      
+      if (response.success) {
+        // Update local state by removing the deleted photo
+        setUserDetails({
+          ...userDetails,
+          photoUrls: userDetails.photoUrls.filter(url => url !== photoUrl)
+        });
+        setSnackbar({ open: true, message: 'Photo deleted successfully', severity: 'success' });
+      } else {
+        setSnackbar({ open: true, message: response.message || 'Failed to delete photo', severity: 'error' });
+      }
+    } catch (err: any) {
+      setSnackbar({ open: true, message: err.message || 'Failed to delete photo', severity: 'error' });
+    } finally {
+      setDeleteLoading(null);
+    }
+  };
+
+  const handleAddPhotos = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!id || !event.target.files) return;
+    
+    const files = Array.from(event.target.files);
+    if (files.length === 0) return;
+
+    try {
+      setUploadLoading(true);
+      const response = await authService.addUserPhotos(id, files);
+      
+      if (response.success && userDetails) {
+        // Update local state with new photos
+        setUserDetails({
+          ...userDetails,
+          photoUrls: [...(userDetails.photoUrls || []), ...response.data.photoUrls]
+        });
+        setSnackbar({ open: true, message: 'Photos added successfully', severity: 'success' });
+        // Reset file input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+      } else {
+        setSnackbar({ open: true, message: response.message || 'Failed to add photos', severity: 'error' });
+      }
+    } catch (err: any) {
+      setSnackbar({ open: true, message: err.message || 'Failed to add photos', severity: 'error' });
+    } finally {
+      setUploadLoading(false);
+    }
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
   };
 
   if (loading) {
@@ -382,10 +448,37 @@ export default function UserDetailsPage() {
             {/* Photos */}
             <Box>
               <Card sx={{ p: 3 }}>
-                <Typography variant="h6" gutterBottom>
-                  Photos
-                </Typography>
+                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+                  <Typography variant="h6">
+                    Photos
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    startIcon={<Iconify icon="solar:gallery-add-bold" />}
+                    component="label"
+                    disabled={uploadLoading}
+                  >
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      multiple
+                      accept="image/*"
+                      style={{ display: 'none' }}
+                      onChange={handleAddPhotos}
+                    />
+                    Add Photos
+                  </Button>
+                </Stack>
                 <Divider sx={{ mb: 2 }} />
+                {uploadLoading && (
+                  <Box sx={{ mb: 2 }}>
+                    <LinearProgress />
+                    <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
+                      Uploading photos...
+                    </Typography>
+                  </Box>
+                )}
                 {userDetails.photoUrls && userDetails.photoUrls.length > 0 ? (
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
                     {userDetails.photoUrls.map((photoUrl, index) => (
@@ -395,12 +488,46 @@ export default function UserDetailsPage() {
                           sx={{
                             p: 1,
                             textAlign: 'center',
+                            position: 'relative',
                             '&:hover': {
                               transform: 'scale(1.05)',
                               transition: 'transform 0.2s',
+                              '& .delete-button': {
+                                opacity: 1,
+                              },
                             },
                           }}
                         >
+                          <Box
+                            sx={{
+                              position: 'absolute',
+                              top: 8,
+                              right: 8,
+                              zIndex: 1,
+                              opacity: 0,
+                              transition: 'opacity 0.2s',
+                            }}
+                            className="delete-button"
+                          >
+                            <IconButton
+                              size="small"
+                              onClick={() => handleDeletePhoto(photoUrl)}
+                              disabled={deleteLoading === photoUrl}
+                              sx={{
+                                bgcolor: 'rgba(255, 255, 255, 0.9)',
+                                '&:hover': {
+                                  bgcolor: 'error.main',
+                                  color: 'white',
+                                },
+                              }}
+                            >
+                              {deleteLoading === photoUrl ? (
+                                <CircularProgress size={20} />
+                              ) : (
+                                <Iconify icon="solar:trash-bin-minimalistic-bold" width={20} />
+                              )}
+                            </IconButton>
+                          </Box>
                           <img
                             src={photoUrl}
                             alt={`Photo ${index + 1}`}
@@ -459,16 +586,14 @@ export default function UserDetailsPage() {
                 {userDetails.preferences ? (
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
                     {userDetails.preferences.ageRange && (
-                      <>
-                        <Box sx={{ flex: { xs: '1', sm: '0 0 50%' } }}>
-                          <Typography variant="body2" color="text.secondary">
-                            <strong>Age Range:</strong>
-                          </Typography>
-                          <Typography variant="body2">
-                            {userDetails.preferences.ageRange.min} - {userDetails.preferences.ageRange.max} years
-                          </Typography>
-                        </Box>
-                      </>
+                      <Box sx={{ flex: { xs: '1', sm: '0 0 50%' } }}>
+                        <Typography variant="body2" color="text.secondary">
+                          <strong>Age Range:</strong>
+                        </Typography>
+                        <Typography variant="body2">
+                          {userDetails.preferences.ageRange.min} - {userDetails.preferences.ageRange.max} years
+                        </Typography>
+                      </Box>
                     )}
                     {userDetails.preferences.distance && (
                       <Box sx={{ flex: { xs: '1', sm: '0 0 50%' } }}>
@@ -590,6 +715,17 @@ export default function UserDetailsPage() {
           </Box>
         </Box>
       </Box>
+      
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} variant="filled">
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 }

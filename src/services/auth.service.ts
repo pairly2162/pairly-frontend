@@ -425,6 +425,54 @@ class AuthService {
     }
   }
 
+  async deleteUserPhoto(userId: string, photoUrl: string) {
+    if (!this.token) {
+      throw new Error('Not authenticated');
+    }
+
+    try {
+      const response = await axios.delete(`${API_BASE_URL}/admin/users/${userId}/photos`, {
+        headers: {
+          Authorization: `Bearer ${this.token}`
+        },
+        data: { photoUrl }
+      });
+      return response.data;
+    } catch (err: any) {
+      if (err.response?.status === 401) {
+        this.clearToken();
+        throw new Error('Session expired. Please login again.');
+      }
+      throw new Error(err.response?.data?.message || 'Failed to delete photo');
+    }
+  }
+
+  async addUserPhotos(userId: string, files: File[]) {
+    if (!this.token) {
+      throw new Error('Not authenticated');
+    }
+
+    const formData = new FormData();
+    files.forEach(file => {
+      formData.append('files', file);
+    });
+
+    try {
+      const response = await axios.post(`${API_BASE_URL}/admin/users/${userId}/photos`, formData, {
+        headers: {
+          Authorization: `Bearer ${this.token}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      return response.data;
+    } catch (err: any) {
+      if (err.response?.status === 401) {
+        this.clearToken();
+        throw new Error('Session expired. Please login again.');
+      }
+      throw new Error(err.response?.data?.message || 'Failed to add photos');
+    }
+  }
 
   logout() {
     this.clearToken();
