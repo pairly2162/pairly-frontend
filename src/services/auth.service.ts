@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://api.pairly.fun';
 
-// const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'; // backend url
+//const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'; // backend url
 
 export interface AdminLoginRequest {
   email: string;
@@ -198,7 +198,7 @@ class AuthService {
     }
   }
 
-  async getDailyChattingUsers(days: number = 30): Promise<Array<{ date: string; userCount: number }>> {
+  async getDailyChattingUsers(days: number = 30): Promise<Array<{ createdAt: string; authorId: string }>> {
     if (!this.token) {
       throw new Error('Not authenticated');
     }
@@ -223,7 +223,7 @@ class AuthService {
     }
   }
 
-  async getDailyUserCreations(days: number = 30): Promise<Array<{ date: string; userCount: number }>> {
+  async getDailyUserCreations(days: number = 30): Promise<Array<{ createdAt: string }>> {
     if (!this.token) {
       throw new Error('Not authenticated');
     }

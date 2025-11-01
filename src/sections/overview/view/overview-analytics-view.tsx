@@ -24,6 +24,46 @@ import { AnalyticsConversionRates } from '../analytics-conversion-rates';
 
 // ----------------------------------------------------------------------
 
+// Helper function to group data by IST (Indian Standard Time)
+const groupByISTDate = <T extends { createdAt: string }>(
+  data: T[],
+  getUniqueKey?: (item: T) => string
+): Array<{ date: string; userCount: number }> => {
+  // Group by IST using toLocaleDateString
+  const dailyStats: Map<string, Set<string>> = new Map();
+
+  data.forEach((item) => {
+    const date = new Date(item.createdAt);
+    // Use toLocaleDateString with IST timezone
+    const dateKey = date.toLocaleDateString('en-US', { 
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      timeZone: 'Asia/Kolkata' // Indian Standard Time (IST)
+    }); // Format: "MM/DD/YYYY"
+    
+    // Convert to YYYY-MM-DD format for consistency
+    const [month, day, year] = dateKey.split('/');
+    const formattedDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+    
+    if (!dailyStats.has(formattedDate)) {
+      dailyStats.set(formattedDate, new Set());
+    }
+    
+    // Use unique key if provided (for messages), otherwise use item index
+    const uniqueKey = getUniqueKey ? getUniqueKey(item) : item.createdAt;
+    dailyStats.get(formattedDate)!.add(uniqueKey);
+  });
+
+  // Convert to array format and sort by date
+  return Array.from(dailyStats.entries())
+    .map(([date, uniqueKeys]) => ({
+      date,
+      userCount: uniqueKeys.size,
+    }))
+    .sort((a, b) => a.date.localeCompare(b.date));
+};
+
 export function OverviewAnalyticsView() {
   const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(null);
   const [dailyChattingUsers, setDailyChattingUsers] = useState<Array<{ date: string; userCount: number }>>([]);
@@ -45,13 +85,15 @@ export function OverviewAnalyticsView() {
           setError(statsResponse.message);
         }
 
-        // Fetch daily chatting users
-        const chattingUsers = await authService.getDailyChattingUsers(30);
-        setDailyChattingUsers(chattingUsers);
+        // Fetch raw data and group by IST dates on frontend
+        const rawChattingUsers = await authService.getDailyChattingUsers(30);
+        const groupedChattingUsers = groupByISTDate(rawChattingUsers, (item) => item.authorId);
+        setDailyChattingUsers(groupedChattingUsers);
 
-        // Fetch daily user creations
-        const userCreations = await authService.getDailyUserCreations(30);
-        setDailyUserCreations(userCreations);
+        // Fetch raw user creations and group by IST dates on frontend
+        const rawUserCreations = await authService.getDailyUserCreations(30);
+        const groupedUserCreations = groupByISTDate(rawUserCreations);
+        setDailyUserCreations(groupedUserCreations);
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -128,8 +170,13 @@ export function OverviewAnalyticsView() {
             chart={{
               categories: dailyChattingUsers.length > 0 
                 ? dailyChattingUsers.map(item => {
-                    const date = new Date(item.date);
-                    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    // Format date in IST
+                    const date = new Date(item.date + 'T00:00:00');
+                    return date.toLocaleDateString('en-US', { 
+                      month: 'short', 
+                      day: 'numeric',
+                      timeZone: 'Asia/Kolkata'
+                    });
                   })
                 : [],
               series: [
@@ -157,8 +204,13 @@ export function OverviewAnalyticsView() {
               colors: ['#FF9800'], // Orange color to differentiate from chatting users chart
               categories: dailyUserCreations.length > 0 
                 ? dailyUserCreations.map(item => {
-                    const date = new Date(item.date);
-                    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    // Format date in IST
+                    const date = new Date(item.date + 'T00:00:00');
+                    return date.toLocaleDateString('en-US', { 
+                      month: 'short', 
+                      day: 'numeric',
+                      timeZone: 'Asia/Kolkata'
+                    });
                   })
                 : [],
               series: [

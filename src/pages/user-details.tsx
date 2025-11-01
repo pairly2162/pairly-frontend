@@ -118,6 +118,7 @@ export default function UserDetailsPage() {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
+      timeZone: 'Asia/Kolkata',
     });
   };
 
@@ -127,6 +128,7 @@ export default function UserDetailsPage() {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
+      timeZone: 'Asia/Kolkata',
       hour: '2-digit',
       minute: '2-digit',
     });

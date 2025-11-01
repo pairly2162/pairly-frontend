@@ -513,7 +513,9 @@ export default function UsersPage() {
 
                 <TableCell>
                   <Typography variant="body2">
-                    {new Date(user.createdAt).toLocaleDateString()}
+                    {new Date(user.createdAt).toLocaleDateString('en-US', {
+                      timeZone: 'Asia/Kolkata'
+                    })}
                   </Typography>
                 </TableCell>
 
