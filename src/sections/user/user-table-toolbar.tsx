@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import Tooltip from '@mui/material/Tooltip';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
@@ -8,8 +9,10 @@ import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import Box from '@mui/material/Box';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import { Iconify } from 'src/components/iconify';
+import { authService } from 'src/services/auth.service';
 
 // ----------------------------------------------------------------------
 
@@ -40,6 +43,26 @@ export function UserTableToolbar({
   cityFilter,
   onCityFilterChange
 }: UserTableToolbarProps) {
+  const [cities, setCities] = useState<string[]>([]);
+  const [citiesLoading, setCitiesLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCities = async () => {
+      try {
+        setCitiesLoading(true);
+        const citiesList = await authService.getDistinctCities();
+        setCities(citiesList);
+      } catch (error) {
+        console.error('Failed to fetch cities:', error);
+        // Keep empty array on error, so component still renders
+      } finally {
+        setCitiesLoading(false);
+      }
+    };
+
+    fetchCities();
+  }, []);
+
   return (
     <Toolbar
       sx={{
@@ -93,7 +116,7 @@ export function UserTableToolbar({
               <MenuItem value="true">Mock Data</MenuItem>
               <MenuItem value="false">Real Data</MenuItem>
             </Select>
-          </FormControl>
+          </FormControl> 
 
           <FormControl size="small" sx={{ minWidth: 120 }}>
             <Select
@@ -113,18 +136,21 @@ export function UserTableToolbar({
               value={cityFilter}
               onChange={(e) => onCityFilterChange(e.target.value)}
               displayEmpty
+              disabled={citiesLoading}
             >
               <MenuItem value="">All Cities</MenuItem>
-              <MenuItem value="Mumbai">Mumbai</MenuItem>
-              <MenuItem value="Delhi">Delhi</MenuItem>
-              <MenuItem value="Bangalore">Bangalore</MenuItem>
-              <MenuItem value="Chennai">Chennai</MenuItem>
-              <MenuItem value="Kolkata">Kolkata</MenuItem>
-              <MenuItem value="Hyderabad">Hyderabad</MenuItem>
-              <MenuItem value="Pune">Pune</MenuItem>
-              <MenuItem value="Ahmedabad">Ahmedabad</MenuItem>
-              <MenuItem value="Jaipur">Jaipur</MenuItem>
-              <MenuItem value="Surat">Surat</MenuItem>
+              {citiesLoading ? (
+                <MenuItem disabled>
+                  <CircularProgress size={16} sx={{ mr: 1 }} />
+                  Loading...
+                </MenuItem>
+              ) : (
+                cities.map((city) => (
+                  <MenuItem key={city} value={city}>
+                    {city}
+                  </MenuItem>
+                ))
+              )}
             </Select>
           </FormControl>
         </Box>

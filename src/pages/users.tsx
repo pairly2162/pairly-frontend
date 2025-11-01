@@ -1,5 +1,4 @@
 import { useRef, useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -45,7 +44,6 @@ import type { AdminUser, UserPaginationParams } from '../services/auth.service';
 // ----------------------------------------------------------------------
 
 export default function UsersPage() {
-  const navigate = useNavigate();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -385,7 +383,9 @@ export default function UsersPage() {
 
   const handleViewDetails = () => {
     if (selectedUser) {
-      navigate(`/admin/user/${selectedUser.id}`);
+      // Open in new tab
+      const url = `/admin/user/${selectedUser.id}`;
+      window.open(url, '_blank', 'noopener,noreferrer');
     }
     handleActionMenuClose();
   };

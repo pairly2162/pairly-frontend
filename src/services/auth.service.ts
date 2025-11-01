@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://api.pairly.fun';
 
-// const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'; // backend url
 
 export interface AdminLoginRequest {
   email: string;
@@ -171,6 +171,80 @@ class AuthService {
         throw new Error('Session expired. Please login again.');
       }
       throw new Error(err.response?.data?.message || 'Failed to fetch user stats');
+    }
+  }
+
+  async getDistinctCities(): Promise<string[]> {
+    if (!this.token) {
+      throw new Error('Not authenticated');
+    }
+
+    try {
+      const response = await axios.get(`${API_BASE_URL}/admin/users/cities`, {
+        headers: {
+          Authorization: `Bearer ${this.token}`
+        }
+      });
+      if (response.data.success) {
+        return response.data.data || [];
+      }
+      throw new Error(response.data.message || 'Failed to fetch cities');
+    } catch (err: any) {
+      if (err.response?.status === 401) {
+        this.clearToken();
+        throw new Error('Session expired. Please login again.');
+      }
+      throw new Error(err.response?.data?.message || 'Failed to fetch cities');
+    }
+  }
+
+  async getDailyChattingUsers(days: number = 30): Promise<Array<{ date: string; userCount: number }>> {
+    if (!this.token) {
+      throw new Error('Not authenticated');
+    }
+
+    try {
+      const response = await axios.get(`${API_BASE_URL}/admin/users/daily-chatting-users`, {
+        headers: {
+          Authorization: `Bearer ${this.token}`
+        },
+        params: { days }
+      });
+      if (response.data.success) {
+        return response.data.data || [];
+      }
+      throw new Error(response.data.message || 'Failed to fetch daily chatting users');
+    } catch (err: any) {
+      if (err.response?.status === 401) {
+        this.clearToken();
+        throw new Error('Session expired. Please login again.');
+      }
+      throw new Error(err.response?.data?.message || 'Failed to fetch daily chatting users');
+    }
+  }
+
+  async getDailyUserCreations(days: number = 30): Promise<Array<{ date: string; userCount: number }>> {
+    if (!this.token) {
+      throw new Error('Not authenticated');
+    }
+
+    try {
+      const response = await axios.get(`${API_BASE_URL}/admin/users/daily-user-creations`, {
+        headers: {
+          Authorization: `Bearer ${this.token}`
+        },
+        params: { days }
+      });
+      if (response.data.success) {
+        return response.data.data || [];
+      }
+      throw new Error(response.data.message || 'Failed to fetch daily user creations');
+    } catch (err: any) {
+      if (err.response?.status === 401) {
+        this.clearToken();
+        throw new Error('Session expired. Please login again.');
+      }
+      throw new Error(err.response?.data?.message || 'Failed to fetch daily user creations');
     }
   }
 

@@ -26,20 +26,32 @@ import { AnalyticsConversionRates } from '../analytics-conversion-rates';
 
 export function OverviewAnalyticsView() {
   const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(null);
+  const [dailyChattingUsers, setDailyChattingUsers] = useState<Array<{ date: string; userCount: number }>>([]);
+  const [dailyUserCreations, setDailyUserCreations] = useState<Array<{ date: string; userCount: number }>>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const fetchDashboardStats = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
         setError('');
-        const response = await authService.getDashboardStats();
-        if (response.success) {
-          setDashboardStats(response.data);
+        
+        // Fetch dashboard stats
+        const statsResponse = await authService.getDashboardStats();
+        if (statsResponse.success) {
+          setDashboardStats(statsResponse.data);
         } else {
-          setError(response.message);
+          setError(statsResponse.message);
         }
+
+        // Fetch daily chatting users
+        const chattingUsers = await authService.getDailyChattingUsers(30);
+        setDailyChattingUsers(chattingUsers);
+
+        // Fetch daily user creations
+        const userCreations = await authService.getDailyUserCreations(30);
+        setDailyUserCreations(userCreations);
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -47,7 +59,7 @@ export function OverviewAnalyticsView() {
       }
     };
 
-    fetchDashboardStats();
+    fetchData();
   }, []);
 
   return (
@@ -108,6 +120,63 @@ export function OverviewAnalyticsView() {
               }}
             />
           </Grid>
+
+        <Grid size={{ xs: 12, md: 6, lg: 8 }}>
+          <AnalyticsWebsiteVisits
+            title="Daily Chatting Users"
+            subheader={`Last 30 days - ${dailyChattingUsers.length > 0 ? `Total ${dailyChattingUsers.reduce((sum, item) => sum + item.userCount, 0)} unique chatting users` : 'No data available'}`}
+            chart={{
+              categories: dailyChattingUsers.length > 0 
+                ? dailyChattingUsers.map(item => {
+                    const date = new Date(item.date);
+                    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                  })
+                : [],
+              series: [
+                { 
+                  name: 'Unique Users', 
+                  data: dailyChattingUsers.map(item => item.userCount)
+                },
+              ],
+              options: {
+                tooltip: {
+                  y: {
+                    formatter: (value: number) => `${value} unique user${value !== 1 ? 's' : ''}`
+                  }
+                }
+              },
+            }}
+          />
+        </Grid>
+
+        <Grid size={{ xs: 12, md: 6, lg: 8 }}>
+          <AnalyticsWebsiteVisits
+            title="Daily User Creations"
+            subheader={`Last 30 days - ${dailyUserCreations.length > 0 ? `Total ${dailyUserCreations.reduce((sum, item) => sum + item.userCount, 0)} new users created` : 'No data available'}`}
+            chart={{
+              colors: ['#FF9800'], // Orange color to differentiate from chatting users chart
+              categories: dailyUserCreations.length > 0 
+                ? dailyUserCreations.map(item => {
+                    const date = new Date(item.date);
+                    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                  })
+                : [],
+              series: [
+                { 
+                  name: 'Users Created', 
+                  data: dailyUserCreations.map(item => item.userCount)
+                },
+              ],
+              options: {
+                tooltip: {
+                  y: {
+                    formatter: (value: number) => `${value} user${value !== 1 ? 's' : ''} created`
+                  }
+                },
+              },
+            }}
+          />
+        </Grid>
 
         {/* <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <AnalyticsWidgetSummary
